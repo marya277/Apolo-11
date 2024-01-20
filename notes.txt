@@ -1,0 +1,14 @@
+Missions short names
+1- OrbitOne = ORBONE
+2- ColonyMoon = CLNM
+3- VacMars = VCMS
+4- GalaxyTwo = GXTO
+5- Unknow: UNKW
+
+Creating the path to the devices folder on
+the simulation_engine.py file:
+DEVICES_FOLDER_PATH = Path(__file__).parent.parent / "data" / "devices"
+
+Los estados posibles para cada dispositivo son: excellent (excelente), good
+(bueno), warning (advertencia), faulty (defectuoso), killed (inoperable) y
+unknown (desconocido).
