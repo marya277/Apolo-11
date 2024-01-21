@@ -1,0 +1,27 @@
+states = ["Excellent", "Good", "Warning", "Faulty", "Killed", "Unknow"]
+delay = 20
+
+[missions]
+    orbit_one = [
+        "OrbitOne", 
+        "ORBONE",
+        ["satellite", "spacecraft", "spacesuit"]
+    ]
+
+    colony_moon = [
+        "ColonyMoon",
+        "CLNM",
+        ["satellite", "spacecraft", "spacesuit", "spacecars"]
+    ]
+
+    vac_mars = [
+        "VacMars",
+        "VCMS",
+        ["satellite", "spacecraft", "spacesuit", "spacecars"]
+    ]
+
+    galaxy_two = [
+        "GalaxyTwo",
+        "GXTO",
+        ["satellite", "spacecraft", "spacesuit", "scientific_equipment"]
+    ]

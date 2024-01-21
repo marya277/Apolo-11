@@ -1,0 +1,38 @@
+from tomllib import loads as toml_loads
+
+class Simulator:
+    def __init__(self):
+        self.load_configuration()
+
+        self.load_missions_names()
+
+        self.load_missions_abbreviations()
+
+        self.load_missions_devices()
+    
+    def load_configuration(self):
+        try:
+            # with open("../configuration.toml", "r+") as file:
+            with open("configuration.toml", "r+") as file:
+                data = file.read()
+                self.config = toml_loads(data)
+        
+        except FileNotFoundError:
+            print("[-] The configuration file does not exists")
+            exit(1)
+    
+    def load_missions_names(self):
+        # print(self.config["missions"])
+        self.missions_names = []
+        for m in self.config["missions"].values():
+            self.missions_names.append(m["name"])
+    
+    def load_missions_abbreviations(self):
+        self.missions_abbreviations = []
+        for m in self.config["missions"].values():
+            self.missions_abbreviations.append(m["abbreviation"])
+
+    def load_missions_devices(self):
+        self.missions_devices = {m: None for m in self.missions_names}
+        for k, v in zip(self.missions_devices.keys(), self.config["missions"].values()):
+            self.missions_devices[k] = v["devices"]

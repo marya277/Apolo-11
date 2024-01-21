@@ -1,0 +1,21 @@
+states = ["Excellent", "Good", "Warning", "Faulty", "Killed", "Unknow"]
+
+[missions.orbit_one]
+    name = "OrbitOne"
+    abbreviation = "ORBONE"
+    devices = ["satellite", "spacecraft", "spacesuit"]
+
+[missions.colony_moon]
+    name = "ColonyMoon"
+    abbreviation = "CLNM"
+    devices = ["satellite", "spacecraft", "spacesuit", "spacecars"]
+
+[missions.vac_mars]
+    name = "VacMars"
+    abbreviation = "VCMS"
+    devices = ["satellite", "spacecraft", "spacesuit", "spacecars"]
+
+[missions.galaxy_two]
+    name = "GalaxyTwo"
+    abbreviation = "GXTO"
+    devices = ["satellite", "spacecraft", "spacesuit", "scientific_equipment"]

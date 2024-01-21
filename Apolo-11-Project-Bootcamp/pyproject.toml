@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "apolo-11-simulation-engine"
+version = "0.1.1"
+description = "Simulation system for the Apollo-11 space mission"
+authors = ["Maria Elena Arroyo"]
+license = "GNU General Public License v3.0"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+
+[tool.poetry.group.dev.dependencies]
+colorama = "^0.4.6"
+pydantic = "^2.5.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

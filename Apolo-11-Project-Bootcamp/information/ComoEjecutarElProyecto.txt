@@ -1,0 +1,10 @@
+1- Instalar dependencias: Posicionarse en la raiz
+del proyecto y verificar que este el archivo "pyproject.toml",
+si existe ejecutar "poetry install" (Sin ningun argumento extra)
+
+2- Cuando se hayan terminado de instalar las dependencias
+ejecutar "poetry shell" para que Poetry cree el ambiente virtual
+y nos ingrese al mismo.
+
+3- En la raiz del proyecto ejecutar:
+"python.exe .\src\main.py run"
