@@ -1,0 +1,28 @@
+root_folder_storage = "<root>/data/"
+devices_folder = "<root>/data/devices/"
+backup_folder = "<root>/data/backup/"
+interval = 10
+max_number_devices = 300
+states = ["Excellent", "Good", "Warning", "Faulty", "Killed", "Unknow"]
+
+date_format = "%d/%m/%y-%H:%M:%S"
+hash_date_format = "%d%m%y%H%M%S%f"
+log_file_pattern = "APL<mission>-<index>.log"
+
+exit_message = "Exiting..."
+
+[missions]
+    orbit_one.name = "OrbitOne"
+    orbit_one.abbreviation = "ORBONE"
+    orbit_one.devices = ["satellite", "spacecraft", "spacesuit"]
+
+    colony_moon.name = "ColonyMoon"
+    colony_moon.abbreviation = "CLNM"
+    colony_moon.devices = ["satellite", "spacecraft", "spacesuit", "spacecars"]
+
+    vac_mars.name = "VacMars"
+    vac_mars.abbreviation = "VCMS"
+    vac_mars.devices = ["satellite", "spacecraft", "spacesuit", "spacecars"]
+    galaxy_two.name = "GalaxyTwo"
+    galaxy_two.abbreviation = "GXTO"
+    galaxy_two.devices = ["satellite", "spacecraft", "spacesuit", "scientific_equipment"]

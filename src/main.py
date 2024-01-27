@@ -1,64 +1,64 @@
+from argparse import ArgumentParser
+from simulation_engine import Simulator
 
-from datetime import datetime
-from hashlib import sha256
+from pathlib import Path
+
 from json import dumps
 
-# MISSIONS BLOCK
-class BasicMission:
-    def __init__(self, mission_name: tuple):
-        # 0- Nombre normal
-        self.mission_name = (mission_name[0],
-        # 1- Nombre clave
-                            mission_name[1])
-    def __str__(self):
-        return self.mission_name[0]
+from base_classes import BaseMission, BaseDevice
 
-class OrbitOne(BasicMission):
-    DEVICES = ("satellite", "spacecraft", "spacesuit")
-    def __init__(self):
-        super().__init__(mission_name=("OrbitOne",
-                                        "ORBONE"))
-class ColonyMoon(BasicMission):
-    DEVICES = ("satellite", "spacecraft", "spacesuit", "spacecars")
-    def __init__(self):
-        super().__init__(mission_name=("ColonyMoon",
-                                        "CLNM"))
-class VacMars(BasicMission):
-    DEVICES = ("satellite", "spacecraft", "spacesuit", "spacecars")
-    def __init__(self):
-        super().__init__(mission_name=("VacMars",
-                                        "VCMS"))
-class GalaxyTwo(BasicMission):
-    DEVICES = ("satellite", "spacecraft", "spacesuit", "scientific_equipment")
-    def __init__(self):
-        super().__init__(mission_name=("GalaxyTwo",
-                                        "GXTO"))
-# END MISSIONS BLOCK
+from time import sleep as delay
+from typing import Dict, Tuple, Generator
+
+import file_handling as fh
 
 
-# COMPONENTS BLOCK
-class BasicComponent:
-    def __init__(self, mission: BasicMission, **kwargs):
-        self.date = datetime.now().strftime("%d/%m/%y-%H:%M:%S")
-        self.hash_date = datetime.now().strftime("%d%m%y%H%M%S%f")
-        self.mission = mission
-        self.__dict__.update(kwargs)
-        self.generate_hash()
-    def __str__(self):
-        return f"{self.mission.mission_name[1]} - {self.device_type} - {self.device_state} - {self._hash}"
-    
-    def generate_hash(self):
-        data_to_hash = f"{self.hash_date}-{self.mission.mission_name[1]}-{self.device_type}-{self.device_state}".encode()
-        hash_object = sha256(data_to_hash)
-        self._hash = hash_object.hexdigest()
+def run_command(args) -> None:
+    try:
+        simulator: Simulator = Simulator()
+        # Iterations File Path
+        # IFP: Path = Path(__file__).parent.parent / "data" / \
+        # "iterations.json"
+        # if not if_exists(IFP):
+        #     create_if(IFP)
+        while True:
+            # print(simulator.config.root_folder_storage)
+            msn = BaseMission(**simulator.select_mission())
+            # print(mission)
+            # Max Number Of Devices
+            max_devs = simulator.total_number_of_devices()
+            # print(max_devs)
 
-    def get_info(self):
-        info = {
-            "date": self.date,
-            "mission": self.mission.mission_name[0],
-            "device_type": self.device_type,
-            "device_status": self.device_state,
-            "hash": self._hash
-        }
-        return dumps(info)
-# END COMPONENTS BLOCK
+            rec_per_dev = simulator. \
+            randomly_distribute_devices(
+                mission=msn,
+                total_amount=max_devs)
+            # print(rec_per_dev)
+            records: Generator[BaseDevice, None, None] = simulator.generate_records(dev_dist=rec_per_dev,
+                    msn=msn)
+            iter_path = simulator.create_iteration_folder()
+            fh.save_records(devs=records, path=iter_path)
+            delay(simulator.operation_interval)
+    except KeyboardInterrupt:
+        print("Exiting...")
+        exit(1)
+
+def main() -> None:
+    parser = ArgumentParser(description="Apolo-11 Simulator")
+    subparsers = parser. \
+    add_subparsers(dest="command", help="Available commands")
+
+    # Create a 'run' subcommand
+    run_parser = subparsers.add_parser("run", help="Run the simulator")
+    run_parser.set_defaults(func=run_command)
+
+    args = parser.parse_args()
+
+    # Check if a subcommand was provided
+    if not hasattr(args, 'func'):
+        parser.print_help()
+    else:
+        args.func(args)
+
+if __name__ == "__main__":
+    main()  
