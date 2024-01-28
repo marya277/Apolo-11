@@ -9,7 +9,7 @@ from collections import defaultdict
 # Define las rutas a las carpetas 'devices' y 'reports'
 devices_path = Path('data/devices')
 reports_path = Path('data/reports')
-reports_path.mkdir(exist_ok=True)  # Crea la carpeta si no existe
+reports_path.mkdir(exist_ok=True)
 
 # Inicializa variables para contar las ejecuciones
 execution_number = 0
@@ -45,30 +45,28 @@ def generate_report():
             return
 
         # Análisis de eventos por estado para cada misión y tipo de dispositivo
-        event_analysis = df.groupby(['mission', 'device_type', 'device_status']).size()
+        event_analysis = df.groupby(['mission', 'device_type', 'device_status']).size().reset_index(name='count')
 
         # Gestión de desconexiones
-        unknown_status = df[df['device_status'] == 'Unknown'].groupby(['mission', 'device_type']).size().sort_values(ascending=False)
+        unknown_status_df = df[df['device_status'] == 'Unknown']
+        unknown_status = unknown_status_df.groupby(['mission', 'device_type']).size().reset_index(name='unknown_count')
+        unknown_status = unknown_status.sort_values(by='unknown_count', ascending=False)
 
         # Consolidación de misiones
-        killed_status = df[df['device_status'] == 'Killed'].groupby('device_type').size()
+        killed_status_df = df[df['device_status'] == 'Killed']
+        killed_status = killed_status_df.groupby(['device_type']).size().reset_index(name='killed_count')
 
         # Cálculo de porcentajes
-        total_events = df.shape[0]
-        percentages = (df.groupby(['mission', 'device_type']).size() / total_events) * 100
+        percentages = df.groupby(['mission', 'device_type']).size().reset_index(name='count')
+        percentages['percentage'] = (percentages['count'] / df.shape[0]) * 100
 
         # Crear el dataframe para el reporte
-        report_df = pd.DataFrame({
-            'Event Analysis': event_analysis,
-            'Disconnections': unknown_status,
-            'Killed Status Consolidation': killed_status,
-            'Percentages': percentages
-        })
+        report_df = pd.concat([event_analysis, unknown_status, killed_status, percentages], axis=1)
 
         # Guardar el dataframe como un archivo CSV
         execution_number += 1
         report_filename = f'activity_report_executionnumber_{execution_number}.csv'
-        report_df.to_csv(reports_path / report_filename)
+        report_df.to_csv(reports_path / report_filename, index=False)
         print(f"Report generated: {report_filename}")
         break
 
