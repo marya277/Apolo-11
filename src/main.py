@@ -11,15 +11,14 @@ from typing import Dict, Generator
 from storing_handling import (save_records,
     create_folder, move_folder)
 
+from tabulate import tabulate
+from colorama import Fore
+
 
 def run_command(args) -> None:
     try:
         simulator: Simulator = Simulator(config_path=args.config[0])
-        # Iterations File Path
-        # IFP: Path = Path(__file__).parent.parent / "data" / \
-        # "iterations.json"
-        # if not if_exists(IFP):
-        #     create_if(IFP)
+        
         while True:
             # print(simulator.config.root_folder_storage)
             msn: BaseMission = BaseMission(**simulator.select_mission())
@@ -30,6 +29,10 @@ def run_command(args) -> None:
             randomly_distribute_devices(
                 mission=msn,
                 total_amount=max_devs)
+            table = list(rec_per_dev.items())
+            table.append(("Total", sum(rec_per_dev.values())))
+            headers = ["Device", "Amount"]
+            print(tabulate(table, headers, tablefmt="grid"))
             records: Generator[BaseDevice, None, None] = simulator.generate_records(dev_dist=rec_per_dev,
                     msn=msn)
             store_path: Path = create_folder(dev_folder_path=simulator. \
