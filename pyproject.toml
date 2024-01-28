@@ -8,15 +8,14 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-pandas = "^2.2.0"
-pyarrow = "^15.0.0"
 
 
 [tool.poetry.group.dev.dependencies]
 colorama = "^0.4.6"
 pydantic = "^2.5.3"
-customtkinter = "^5.2.2"
-loguru = "^0.7.2"
+types-colorama = "^0.4.15.20240106"
+pandas = "^2.2.0"
+pyarrow = "^15.0.0"
 
 [build-system]
 requires = ["poetry-core"]

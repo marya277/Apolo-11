@@ -1,6 +1,6 @@
 from typing import Generator
 from pathlib import Path
-
+from time import sleep as delay
 def save_records(devs: Generator[int, None, None],
         path: Path):
     # Obtener abreviacion de la mision
@@ -14,4 +14,5 @@ def save_records(devs: Generator[int, None, None],
             file.write(record.get_info())
     print(abbreviation)
     
-    
+    def move_folder(src: Path, dst: Path) -> None:
+        move(src=src, dst=dst)

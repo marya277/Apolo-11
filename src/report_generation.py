@@ -11,8 +11,8 @@ devices_path = Path('data/devices')
 reports_path = Path('data/reports')
 reports_path.mkdir(exist_ok=True)
 
-# Inicializa variables para contar las ejecuciones
-execution_number = 0
+# Inicializa el número de ejecución basándose en los archivos existentes
+execution_number = len(list(reports_path.glob('activity_report_executionnumber_*.csv')))
 
 # Función para leer los archivos log y convertirlos en un dataframe
 def read_logs_and_create_dataframe(devices_path):
@@ -25,8 +25,8 @@ def read_logs_and_create_dataframe(devices_path):
                     try:
                         log_data = json.load(file)
                         events_data.append(log_data)
-                    except json.JSONDecodeError:
-                        print(f"Error reading {log_file}")
+                    except json.JSONDecodeError as e:
+                        print(f"Error reading {log_file}: {e}")
     return pd.DataFrame(events_data)
 
 # Función principal que genera el reporte

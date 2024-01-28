@@ -1,13 +1,12 @@
 from tomllib import loads as toml_loads
 from random import choice as random_choice
 from random import randint
-from datetime import datetime
 from base_classes import BaseMission, BaseDevice
-from typing import Dict, List, Any, Generator, Union
+from typing import Dict, List, Any, Generator
 from pydantic import BaseModel, validator
-
-
+from colorama import Fore
 from custom_exceptions import (
+    # ConfigFileNotFoundError,
     InvalidIntervalError,
     InvalidStoringPath,
     InvalidMaxNumber
@@ -54,8 +53,8 @@ class Configuration(BaseModel):
             raise InvalidMaxNumber(nbr=value)
         return value
 class Simulator:
-    def __init__(self):
-
+    def __init__(self, config_path: str):
+        self.config_path = Path(config_path)
         self.load_configuration()
 
         self.load_max_number_devices()
@@ -69,7 +68,8 @@ class Simulator:
 
     def load_configuration(self) -> None:
         try:
-            with open("new-configuration.toml", "r+") as file:
+            # with open("configuration.toml", "r+") as file:
+            with open(self.config_path, "r+") as file:
                 # Read the content of the configuration file
                 data: str = file.read()
                 # Assign the whole content of the configuration file
@@ -79,7 +79,7 @@ class Simulator:
                 Configuration(**config_content)
 
         except FileNotFoundError:
-            print("[-] The configuration file does not exists")
+            print(Fore.RED + "[-] The configuration file does not exists")
             exit(1)
 
     def load_max_number_devices(self) -> None:
@@ -133,21 +133,19 @@ class Simulator:
         for dev, amount in dev_dist.items():
             # mission: BaseMission = msn
             # print(rcd)
-            for _ in range(0, amount):
-                dve: BaseDevice = BaseDevice(msn=msn, dev_type=dev,
-                    state=random_choice(self.config.states),
-                    date_fmt=self.config.date_format,
-                    hash_dt_fmt=self.config.hash_date_format)
-                yield dve
-    
-    # def create_iteration_folder(devices_folder: Path) -> Path:
-    def create_iteration_folder(self) -> Path:
-        # Crea una subcarpeta basada en la fecha y hora actual para la iteración
-        iteration_folder: Path = self.config.devices_folder / datetime.now().strftime('%Y%m%d%H%M%S')
-        
-        # Verifica si la carpeta ya existe, y si no, la crea
-        if not iteration_folder.exists():
-            iteration_folder.mkdir()
+            for d in range(0, amount):
+                if dev == "unknow":
+                    msn: BaseMission = BaseMission(name="Unknow", abbreviation="UKNW",
+                                        devices="No devices")
+                    rcd: BaseDevice = BaseDevice(msn=msn, dev_type=dev,
+                        state="Unknow",
+                        date_fmt=self.config.date_format,
+                        hash_dt_fmt=self.config.hash_date_format)
+                    yield rcd
 
-        # print(f"Iteration folder created: {iteration_folder}")
-        return iteration_folder
+                else:
+                    rcd: BaseDevice = BaseDevice(msn=msn, dev_type=dev,
+                        state=random_choice(self.config.states),
+                        date_fmt=self.config.date_format,
+                        hash_dt_fmt=self.config.hash_date_format)
+                    yield rcd

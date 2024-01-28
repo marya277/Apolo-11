@@ -3,19 +3,18 @@ from simulation_engine import Simulator
 
 from pathlib import Path
 
-from json import dumps
-
 from base_classes import BaseMission, BaseDevice
 
 from time import sleep as delay
-from typing import Dict, Tuple, Generator
+from typing import Dict, Generator
 
-import file_handling as fh
+from storing_handling import (save_records,
+    create_folder, move_folder)
 
 
 def run_command(args) -> None:
     try:
-        simulator: Simulator = Simulator()
+        simulator: Simulator = Simulator(config_path=args.config[0])
         # Iterations File Path
         # IFP: Path = Path(__file__).parent.parent / "data" / \
         # "iterations.json"
@@ -23,22 +22,21 @@ def run_command(args) -> None:
         #     create_if(IFP)
         while True:
             # print(simulator.config.root_folder_storage)
-            msn = BaseMission(**simulator.select_mission())
+            msn: BaseMission = BaseMission(**simulator.select_mission())
             # print(mission)
             # Max Number Of Devices
-            max_devs = simulator.total_number_of_devices()
-            # print(max_devs)
-
-            rec_per_dev = simulator. \
+            max_devs: int = simulator.total_number_of_devices()
+            rec_per_dev: Dict[str, int] = simulator. \
             randomly_distribute_devices(
                 mission=msn,
                 total_amount=max_devs)
-            # print(rec_per_dev)
             records: Generator[BaseDevice, None, None] = simulator.generate_records(dev_dist=rec_per_dev,
                     msn=msn)
-            iter_path = simulator.create_iteration_folder()
-            fh.save_records(devs=records, path=iter_path)
+            store_path: Path = create_folder(dev_folder_path=simulator. \
+                config.devices_folder)
+            save_records(devs=records, store_path=store_path)
             delay(simulator.operation_interval)
+            move_folder(src=store_path, dst=simulator.config.backup_folder)
     except KeyboardInterrupt:
         print("Exiting...")
         exit(1)
@@ -50,6 +48,10 @@ def main() -> None:
 
     # Create a 'run' subcommand
     run_parser = subparsers.add_parser("run", help="Run the simulator")
+    run_parser.add_argument("-c", "--config",
+        action="store", nargs=1, default="configuration.toml",
+        required=False, help="Specify the path to the configuration file",
+        metavar="PATH", dest="config", type=str)
     run_parser.set_defaults(func=run_command)
 
     args = parser.parse_args()

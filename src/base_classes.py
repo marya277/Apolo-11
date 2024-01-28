@@ -2,9 +2,7 @@ from datetime import datetime
 from hashlib import sha256
 from json import dumps
 
-from typing import List, Tuple
-
-from pydantic import BaseModel, Field
+from typing import List
 
 from dataclasses import dataclass
 
@@ -12,14 +10,14 @@ from dataclasses import dataclass
 class BaseMission:
     name: str
     abbreviation: str
-    devices: List[str]
+    devices: List[str] | str
 
     def __str__(self):
         return f"{self.name}-{self.abbreviation} | {self.devices}"
 
 @dataclass
 class BaseDevice:
-    msn: BaseMission
+    msn: BaseMission | str
     dev_type: str
     state: str
     date_fmt: str
