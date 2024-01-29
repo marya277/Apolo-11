@@ -8,15 +8,19 @@ from typing import List, Dict, Any
 
 from tabulate import tabulate
 
+# Define las rutas a los directorios de dispositivos y reportes.
 devices_path: Path = Path('data/devices')
 reports_path: Path = Path('data/reports')
 reports_path.mkdir(exist_ok=True)
 
+# Calcula el número de ejecución basándose en los reportes existentes.
 execution_number: int = len(list(reports_path.glob('activity_report_executionnumber_*.csv')))
 
 def read_logs_and_create_dataframe(devices_path: Path) -> pd.DataFrame:
     current_year: int = datetime.now().year
     events_data: List[Dict[str, Any]] = []
+    
+    # Itera sobre cada carpeta dentro del directorio de dispositivos.
     for folder in devices_path.iterdir():
         if str(current_year) in folder.name and folder.is_dir():
             for log_file in folder.glob('*.log'):
@@ -42,48 +46,41 @@ def generate_report() -> None:
             print("No event files found to generate the report.")
             return
 
-        # Análisis de eventos por estado para cada misión y tipo de dispositivo
+        # Análisis de eventos por estado para cada misión y tipo de dispositivo.
         event_analysis: pd.DataFrame = df.groupby(['mission', 'device_type', 'device_status']).size().reset_index(name='count')
 
-        # Gestión de desconexiones
+        # Gestión de desconexiones.
         unknown_status_df: pd.DataFrame = df[df['device_status'] == 'Unknown']
         unknown_status: pd.DataFrame = unknown_status_df.groupby(['mission', 'device_type']).size().reset_index(name='unknown_count')
-        unknown_status = unknown_status.sort_values(by='unknown_count', ascending=False)
 
-        # Consolidación de misiones
+        # Consolidación de misiones.
         killed_status_df: pd.DataFrame = df[df['device_status'] == 'Killed']
-        killed_status: pd.DataFrame = killed_status_df.groupby(['device_type']).size().reset_index(name='killed_count')
+        killed_status: pd.DataFrame = killed_status_df.groupby(['mission', 'device_type']).size().reset_index(name='killed_count')
 
-        # Cálculo de porcentajes
-        percentages: pd.DataFrame = df.groupby(['mission', 'device_type']).size().reset_index(name='count')
-        percentages['percentage'] = (percentages['count'] / df.shape[0]) * 100
+        # Cálculo de porcentajes.
+        percentages: pd.DataFrame = df.groupby(['mission', 'device_type']).size().reset_index(name='event_count')
+        total_events = df.shape[0]
+        percentages['percentage'] = (percentages['event_count'] / total_events) * 100
 
-        # Crear el dataframe para el reporte
-        report_df: pd.DataFrame = pd.concat([event_analysis, unknown_status, killed_status, percentages], axis=1)
+        # Combina los DataFrames manteniendo las claves consistentes.
+        combined_df: pd.DataFrame = pd.merge(event_analysis, unknown_status, on=['mission', 'device_type'], how='left')
+        combined_df = pd.merge(combined_df, killed_status, on=['mission', 'device_type'], how='left')
+        combined_df = pd.merge(combined_df, percentages, on=['mission', 'device_type'], how='left')
 
-        # Guardar el dataframe como un archivo CSV
+        # Rellena los valores NaN con 0 para las columnas de conteos.
+        combined_df.fillna(0, inplace=True)
+
+        # Guarda el dataframe como archivo CSV.
         execution_number += 1
         report_filename: str = f'activity_report_executionnumber_{execution_number}.csv'
-        report_df.to_csv(reports_path / report_filename, index=False)
+        combined_df.to_csv(reports_path / report_filename, index=False)
         print(f"Report generated: {report_filename}")
-        report_df.fillna(0, inplace=True)
 
-        # Generación de tabla en dos partes
-        columns_part1: List[str] = ['mission', 'device_type', 'device_status']
-        columns_part2: List[str] = ['mission', 'count', 'unknown_count', 'killed_count', 'percentage']
-
-        report_part1: pd.DataFrame = report_df[columns_part1]
-        report_part2: pd.DataFrame = report_df[columns_part2]
-
-        # Primera parte de la tabla 
-        print("\nTable (Part 1) representation of the report:")
-        print(tabulate(report_part1, headers='keys', tablefmt='pretty', showindex=False))
-
-        # Segunda parte de la tabla
-        print("\nTable (Part 2) representation of the report:")
-        print(tabulate(report_part2, headers='keys', tablefmt='pretty', showindex=False))
-
+        # Imprime la representación de la tabla.
+        print("\nTable representation of the report:")
+        print(tabulate(combined_df, headers='keys', tablefmt='pretty', showindex=False))
         break
 
 if __name__ == "__main__":
     generate_report()
+
